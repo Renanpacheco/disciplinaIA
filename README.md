@@ -70,7 +70,7 @@ Os descendentes são criados a partir de cópias dos pais e recebem mutações. 
 Clone o repositório e entre na pasta do projeto:
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
+git clone <https://github.com/Renanpacheco/disciplinaIA>
 cd <projeto2>
 ```
 
