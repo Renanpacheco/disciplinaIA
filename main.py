@@ -13,14 +13,14 @@ gym.register_envs(ale_py)
 ENV_ID = "ALE/Breakout-v5"
 
 TAMANHO_POPULACAO = 10
-NUM_GERACOES = 10
+NUM_GERACOES = 20
 
 NUM_ENTRADAS = 128
 NUM_OCULTOS = 16
 NUM_ACOES = 4
 
-TAXA_MUTACAO = 0.10
-INTENSIDADE_MUTACAO = 0.20
+TAXA_MUTACAO = 0.02
+INTENSIDADE_MUTACAO = 0.10
 NUM_ELITE = 2
 
 
@@ -175,7 +175,7 @@ def salvar_historico(historico):
 
     caminho_csv = os.path.join(
         pasta_resultados,
-        "historico.csv"
+        "historico3.csv"
     )
 
     with open(

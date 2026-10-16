@@ -8,7 +8,7 @@ medias = []
 piores = []
 
 
-with open("historico.csv", "r", newline="", encoding="utf-8") as arquivo:
+with open("historico3.csv", "r", newline="", encoding="utf-8") as arquivo:
     leitor = csv.DictReader(arquivo)
 
     for linha in leitor:
@@ -32,9 +32,9 @@ plt.grid(True, linestyle="--", alpha=0.5)
 plt.tight_layout()
 
 
-plt.savefig("grafico_evolucao.png", dpi=300)
+plt.savefig("grafico_evolucao3.png", dpi=300)
 
 
 plt.show()
 
-print("Gráfico salvo em grafico_evolucao.png")
+print("Gráfico salvo em grafico_evolucao3.png")
