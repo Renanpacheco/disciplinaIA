@@ -1,171 +1,160 @@
-# Algoritmo Genético aplicado ao Atari Freeway
+# Algoritmo Genético aplicado ao Atari Breakout
 
-## 1. Objetivo
+## 1. Descrição do projeto
 
-Este projeto utiliza um algoritmo genético para otimizar os parâmetros de uma rede neural que controla um agente no jogo Atari Freeway. O objetivo é investigar como a seleção, o elitismo e a mutação influenciam o desempenho dos agentes ao longo das gerações.
+Este projeto utiliza um **algoritmo genético** para otimizar uma rede neural simples capaz de tomar decisões no jogo Atari Breakout. O objetivo é evoluir agentes por meio de seleção, elitismo e mutação, buscando aumentar a recompensa obtida durante as partidas.
 
-Cada indivíduo da população representa uma rede neural com parâmetros próprios. O desempenho é medido pelo fitness, calculado a partir da soma das recompensas obtidas durante um episódio.
+O ambiente é executado por meio da biblioteca Gymnasium, utilizando o ALE (Arcade Learning Environment).
 
 ## 2. Tecnologias utilizadas
 
-* Python 3
+* Python
 * NumPy
 * Gymnasium
 * ALE-Py
 * Matplotlib
-* CSV, para armazenamento dos resultados
 
-## 3. Ambiente e observações
+## 3. Estrutura do projeto
 
-* **Ambiente:** `ALE/Freeway-v5`
-* **Biblioteca:** Gymnasium com ALE-Py
-* **Tipo de observação:** RAM (`obs_type="ram"`)
-* **Entradas da rede neural:** 128 valores da RAM do Atari
-* **Camada oculta:** 16 neurônios
-* **Saídas:** 3 valores correspondentes às ações disponíveis
-* **Função de ativação:** tangente hiperbólica (`tanh`)
-* **Critério de escolha da ação:** maior valor de saída (`argmax`)
-* **Fitness:** soma das recompensas acumuladas durante o episódio
+```text
+disciplinaIA/
+├── main.py
+└── resultados/
+    ├── gerar_grafico.py
+    ├── historico.csv
+    └── grafico_evolucao.png
+```
 
-A observação por RAM utiliza os dados internos do ambiente, em vez de fornecer imagens do jogo à rede neural. Os valores são convertidos para ponto flutuante e normalizados pela divisão por 255.
+* `main.py`: executa o algoritmo genético e salva os resultados de cada geração.
+* `resultados/gerar_grafico.py`: lê os dados do CSV e gera o gráfico de evolução.
+* `resultados/historico.csv`: armazena o melhor, o pior e o fitness médio de cada geração.
+* `resultados/grafico_evolucao.png`: imagem gerada pelo script de visualização.
+
+Os arquivos `historico.csv` e `grafico_evolucao.png` são gerados durante a execução dos respectivos scripts.
 
 ## 4. Configuração do experimento
 
-| Parâmetro                             |                               Valor |
-| ------------------------------------- | ----------------------------------: |
-| Ambiente                              |                    `ALE/Freeway-v5` |
-| Tamanho da população                  |                       20 indivíduos |
-| Número de gerações                    |                                  30 |
-| Entradas da rede neural               |                                 128 |
-| Neurônios ocultos                     |                                  16 |
-| Saídas da rede neural                 |                                   3 |
-| Estratégia de seleção                 | Seleção dos 50% melhores indivíduos |
-| Quantidade de indivíduos selecionados |                                  10 |
-| Elitismo                              |                        2 indivíduos |
-| Taxa de mutação                       |                          0,10 (10%) |
-| Intensidade da mutação                |                                0,20 |
+O experimento foi executado com os seguintes parâmetros:
 
-### Seleção
+| Parâmetro                           |             Valor |
+| ----------------------------------- | ----------------: |
+| Ambiente                            | `ALE/Breakout-v5` |
+| Tipo de observação                  |       Memória RAM |
+| Entradas da rede neural             |               128 |
+| Neurônios na camada oculta          |                16 |
+| Saídas da rede neural               |                 4 |
+| Tamanho da população                |                10 |
+| Número de gerações                  |                10 |
+| Pais selecionados por geração       |                 5 |
+| Indivíduos preservados por elitismo |                 2 |
+| Taxa de mutação                     |              0,10 |
+| Intensidade da mutação              |              0,20 |
 
-Os indivíduos são ordenados de acordo com o fitness em ordem decrescente. Os 10 melhores são selecionados para participar da reprodução.
+### Rede neural
 
-### Elitismo
+A rede neural recebe os 128 valores da memória RAM do ambiente, normalizados para o intervalo de 0 a 1. Esses valores são processados por uma camada oculta de 16 neurônios, que utiliza a função de ativação tangente hiperbólica (`tanh`).
 
-Os dois melhores indivíduos entre os selecionados são copiados para a geração seguinte sem alterações. Essa estratégia preserva soluções de alto desempenho.
+A camada de saída possui quatro valores, correspondentes às ações disponíveis para o agente. A ação escolhida é aquela que apresenta o maior valor de saída (`argmax`).
 
-### Mutação
+### Fitness
 
-Cada parâmetro da rede neural possui 10% de probabilidade de sofrer uma alteração aleatória. A perturbação é obtida por uma distribuição normal, multiplicada pela intensidade de mutação de 0,20.
+O fitness representa a soma das recompensas obtidas pelo agente durante uma partida. No Breakout, a recompensa está relacionada ao desempenho no jogo, como atingir os tijolos.
 
-Os descendentes são criados a partir de cópias dos pais e recebem mutações. Nesta implementação, não é utilizado cruzamento (crossover) entre dois indivíduos.
+Quanto maior o fitness, melhor foi o desempenho do agente naquela avaliação.
 
-## 5. Instalação e execução
+## 5. Funcionamento do algoritmo genético
+
+O algoritmo segue estas etapas:
+
+1. **Inicialização:** criação de uma população com 10 agentes, cada um com parâmetros aleatórios na rede neural.
+2. **Avaliação:** execução de uma partida para cada agente, registrando sua recompensa acumulada como fitness.
+3. **Seleção:** escolha dos cinco agentes com maior fitness para compor o grupo de pais.
+4. **Elitismo:** preservação dos dois melhores agentes, sem alterações em seus parâmetros.
+5. **Reprodução:** criação de novos indivíduos a partir de cópias dos pais selecionados.
+6. **Mutação:** alteração aleatória de parte dos pesos e vieses da rede neural.
+7. **Nova geração:** formação de uma população de 10 agentes, que será avaliada novamente.
+
+O processo é repetido até completar as 10 gerações configuradas.
+
+## 6. Como executar o projeto
 
 ### Pré-requisitos
 
-É necessário ter Python 3 e pip instalados.
+* Python instalado.
+* Git instalado, caso o projeto seja clonado do GitHub.
 
-### Instalação
-
-Clone o repositório e entre na pasta do projeto:
+### Clonar o repositório
 
 ```bash
-git clone <https://github.com/Renanpacheco/disciplinaIA>
-cd <projeto2>
+git clone https://github.com/Renanpacheco/disciplinaIA.git
+cd disciplinaIA
 ```
 
-Crie e ative um ambiente virtual.
+### Criar e ativar o ambiente virtual
 
-Linux:
+No Linux:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Windows:
+### Instalar as dependências
 
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-```
-
-Instale as dependências:
+O projeto utiliza o arquivo `requirements.txt` para instalar as bibliotecas e suas versões registradas.
 
 ```bash
-python -m pip install numpy gymnasium ale-py matplotlib
+pip install -r requirements.txt
 ```
 
-### Executar o experimento
+### Executar o algoritmo genético
 
-Execute o script principal:
+Na raiz do projeto, execute:
 
 ```bash
 python main.py
 ```
 
-Ao finalizar o treinamento, o programa deverá gerar o arquivo `historico.csv`, contendo o melhor, o médio e o pior fitness de cada geração.
+O programa executará o algoritmo genético e salvará os resultados das gerações no arquivo:
 
-Para gerar o gráfico de evolução:
+```text
+resultados/historico.csv
+```
+
+### Gerar o gráfico dos resultados
+
+Depois que a execução do algoritmo terminar, gere o gráfico com:
 
 ```bash
-cd resultados
-python gerar_grafico.py
+python resultados/gerar_grafico.py
 ```
 
-O script de visualização deverá ler `historico.csv` e salvar `grafico_evolucao.png`.
+O gráfico será salvo em:
 
-## 6. Resultados experimentais
-
-Foram previstos três experimentos para analisar o comportamento do algoritmo genético. Os resultados devem ser registrados individualmente, utilizando os arquivos CSV produzidos por cada execução.
-
-### Experimento 1
-
-**Configuração:** população de 20 indivíduos, 30 gerações, elitismo de 2 indivíduos e mutação de 10%, com intensidade de 0,20.
-
-Resultados observados:
-
-* Melhor fitness: 28, na geração 21.
-* Melhor fitness na última geração: 27.
-* Maior fitness médio: 24,10, na geração 28.
-* Fitness médio na última geração: 22,70.
-* Pior fitness na última geração: 12.
-
-## 7. Gráfico de evolução
-
-O gráfico de evolução deve apresentar duas curvas principais:
-
-* **Melhor fitness por geração:** permite acompanhar o melhor desempenho obtido em cada geração.
-* **Fitness médio por geração:** permite observar a evolução geral da população.
-
-O gráfico gerado a partir dos dados do primeiro experimento deverá ser salvo em `grafico_evolucao.png` e incluído neste README.
-
-Após adicionar a imagem ao repositório, utilize:
-
-```markdown
-![Evolução do melhor e do fitness médio](grafico_evolucao.png)
+```text
+resultados/grafico_evolucao.png
 ```
 
-A comparação entre os três experimentos deve utilizar os respectivos históricos, permitindo verificar o efeito das configurações sobre o desempenho e a convergência.
 
-## 8. Análise de exploração e convergência
+## 7. Resultados do experimento
 
-No primeiro experimento, houve uma melhora expressiva nas primeiras gerações. O fitness médio aumentou de 3,40 na geração 0 para 22,25 na geração 3. Esse comportamento indica que a seleção e a reprodução permitiram encontrar rapidamente redes neurais com desempenho superior ao das soluções iniciais.
+Os resultados obtidos nas 10 gerações foram:
 
-Após a geração 10, o melhor fitness passou a oscilar predominantemente entre 26 e 27, atingindo 28 na geração 21. O fitness médio também apresentou oscilações, com seu maior valor na geração 28. Esses resultados sugerem uma fase de ganhos marginais e possível estagnação parcial.
+| Geração | Melhor fitness | Fitness médio | Pior fitness |
+| ------: | -------------: | ------------: | -----------: |
+|       0 |            7,0 |           3,8 |          0,0 |
+|       1 |           11,0 |           5,6 |          1,0 |
+|       2 |           11,0 |           3,9 |          1,0 |
+|       3 |           11,0 |           8,2 |          3,0 |
+|       4 |           11,0 |           6,9 |          2,0 |
+|       5 |           11,0 |           5,5 |          0,0 |
+|       6 |           11,0 |           8,5 |          2,0 |
+|       7 |           11,0 |           5,1 |          2,0 |
+|       8 |           11,0 |           5,8 |          1,0 |
+|       9 |           11,0 |           5,8 |          3,0 |
 
-A mutação permite explorar novas configurações dos pesos e vieses da rede neural. Entretanto, alterações aleatórias também podem prejudicar indivíduos que anteriormente apresentavam bom desempenho. Na geração 29, o pior fitness caiu de 21 para 12, enquanto a média caiu de 24,10 para 22,70.
+### Análise dos resultados
 
-A queda pode estar relacionada à deterioração de descendentes após a mutação ou à variabilidade na avaliação dos episódios. Os dados agregados, isoladamente, não permitem determinar a causa.
+O melhor fitness aumentou de 7,0 na geração inicial para 11,0 na primeira geração seguinte. Esse valor permaneceu constante até a geração 9.
 
-O elitismo preserva dois indivíduos sem mutação, reduzindo o risco de perder as melhores soluções encontradas nas gerações anteriores. Entretanto, ele não impede a redução do desempenho médio ou do pior fitness.
-
-Para avaliar melhor a exploração e a convergência, recomenda-se comparar diferentes taxas e intensidades de mutação, executar múltiplas repetições com sementes controladas e avaliar os agentes em mais de um episódio.
-
-## 9. Conclusão
-
-O primeiro experimento demonstrou uma melhora rápida do desempenho inicial, seguida por uma fase de evolução mais lenta. O melhor fitness alcançado foi 28, mas o desempenho não apresentou crescimento consistente nas últimas gerações.
-
-Os próximos experimentos devem investigar se mudanças na taxa de mutação, na intensidade das alterações e no tamanho da população podem melhorar o desempenho médio e a estabilidade das soluções.
-
-A comparação dos três experimentos permitirá analisar de maneira mais consistente o equilíbrio entre exploração de novas soluções, preservação dos melhores indivíduos e convergência do algoritmo genético.
+A permanência do melhor resultado pode indicar estagnação da evolução, mas não é suficiente para concluir que o algoritmo atingiu uma solução ótima.
